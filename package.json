@@ -1,6 +1,6 @@
 {
   "name": "jvit-redmine-context-cli",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "CLI to extract Redmine issues as context for agentic coding workflows",
   "type": "module",
   "bin": {
