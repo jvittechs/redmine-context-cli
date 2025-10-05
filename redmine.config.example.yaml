@@ -1,0 +1,29 @@
+# Example configuration for jvit-redmine-context-cli
+# Copy this file to redmine.config.yaml and update with your settings
+
+baseUrl: https://redmine.example.com
+apiAccessToken: YOUR_API_TOKEN_HERE
+project:
+  id: 123
+  identifier: my-project
+outputDir: .jai1/redmine
+defaults:
+  include: [journals, relations, attachments]
+  status: '*'
+  pageSize: 100
+  concurrency: 4
+  retry:
+    retries: 3
+    baseMs: 300
+filename:
+  pattern: '{issueId}-{slug}.md'
+  slug:
+    maxLength: 80
+    dedupe: true
+    lowercase: true
+  renameOnTitleChange: false
+comments:
+  anchors:
+    start: '<!-- redmine:comments:start -->'
+    end: '<!-- redmine:comments:end -->'
+  trackBy: journalId

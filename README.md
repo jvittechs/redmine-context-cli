@@ -1,23 +1,25 @@
-# jvit-redmine-cli
+# jvit-redmine-context-cli
 
-A project-based CLI for syncing Redmine issues to local Markdown files.
+A CLI to extract Redmine issues as context for agentic coding workflows.
 
 ## Features
 
-- Sync individual issues or entire projects
+- Extract Redmine issues as structured context for AI agents
+- Sync individual issues or entire projects to local Markdown files
 - Incremental updates with change detection
 - Comment synchronization with tracking
 - Configurable filename patterns and slug generation
 - Concurrent processing for large projects
 - Retry logic and rate limiting
 - YAML configuration with validation
+- Optimized for agentic coding workflows and context retrieval
 
 ## Installation
 
 ```bash
-npm install -g jvit-redmine-cli
+npm install -g jvit-redmine-context-cli
 # or
-pnpm add -g jvit-redmine-cli
+pnpm add -g jvit-redmine-context-cli
 ```
 
 ## Configuration
@@ -30,7 +32,7 @@ apiAccessToken: YOUR_API_TOKEN
 project:
   id: 123
   identifier: my-project
-outputDir: .redmine
+outputDir: .jai1/redmine
 defaults:
   include: [journals, relations, attachments]
   status: '*'
@@ -59,7 +61,7 @@ comments:
 - `apiAccessToken`: Redmine API access token
 - `project.id`: Project ID (numeric)
 - `project.identifier`: Project identifier (string)
-- `outputDir`: Directory to store markdown files (default: `.redmine`)
+- `outputDir`: Directory to store markdown files (default: `.jai1/redmine`)
 - `defaults.include`: What to include (journals, relations, attachments)
 - `defaults.status`: Filter by status (`*` for all)
 - `defaults.pageSize`: API page size (1-100)
@@ -190,4 +192,5 @@ pnpm lint
 ## License
 
 MIT
+
 # redmine-context-cli
