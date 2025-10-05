@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { randomBytes } from 'crypto';
 
 const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 
@@ -14,13 +15,31 @@ try {
     const changesetStatus = execSync('pnpm changeset status', { encoding: 'utf8' });
 
     if (changesetStatus.includes('No changesets found')) {
-      console.log('📝 No changesets found. Creating an empty changeset for patch release...');
-      execSync('pnpm changeset add --empty', { stdio: 'inherit' });
+      console.log('📝 No changesets found. Creating a patch changeset...');
+      // Create a patch changeset file directly
+      const changesetId = randomBytes(4).toString('hex');
+      const changesetContent = `---
+"jvit-redmine-context-cli": patch
+---
+
+Automatic patch release
+`;
+      writeFileSync(`.changeset/${changesetId}.md`, changesetContent);
+      console.log(`✅ Created changeset: ${changesetId}.md`);
     }
   } catch (error) {
     if (error.message.includes('no changesets were found')) {
-      console.log('📝 No changesets found. Creating an empty changeset for patch release...');
-      execSync('pnpm changeset add --empty', { stdio: 'inherit' });
+      console.log('📝 No changesets found. Creating a patch changeset...');
+      // Create a patch changeset file directly
+      const changesetId = randomBytes(4).toString('hex');
+      const changesetContent = `---
+"jvit-redmine-context-cli": patch
+---
+
+Automatic patch release
+`;
+      writeFileSync(`.changeset/${changesetId}.md`, changesetContent);
+      console.log(`✅ Created changeset: ${changesetId}.md`);
     } else {
       throw error;
     }
@@ -43,18 +62,29 @@ try {
   const newVersion = newPackageJson.version;
   console.log(`🔢 Version bumped to ${newVersion}`);
 
-  // Commit the version changes
-  console.log('📋 Committing version changes...');
-  execSync('git add package.json CHANGELOG.md', { stdio: 'inherit' });
-  execSync(`git commit -m "chore: bump version to ${newVersion}"`, { stdio: 'inherit' });
+  // Check if version actually changed
+  if (packageJson.version !== newVersion) {
+    // Commit the version changes
+    console.log('📋 Committing version changes...');
+    execSync('git add package.json CHANGELOG.md', { stdio: 'inherit' });
+    execSync(`git commit -m "chore: bump version to ${newVersion}"`, { stdio: 'inherit' });
 
-  // Push to remote
-  console.log('📤 Pushing to remote...');
-  execSync('git push origin main', { stdio: 'inherit' });
+    // Push to remote
+    console.log('📤 Pushing to remote...');
+    execSync('git push origin main', { stdio: 'inherit' });
+  } else {
+    console.log('ℹ️  No version change detected, skipping git commit and push');
+  }
 
   // Publish to npm
   console.log('📦 Publishing to npm...');
-  execSync('pnpm changeset publish', { stdio: 'inherit' });
+  try {
+    execSync('npm publish --access public', { stdio: 'inherit' });
+  } catch (error) {
+    console.log('⚠️  npm publish failed. You may need to publish manually:');
+    console.log(`   npm publish --access public`);
+    console.log('Error:', error.message);
+  }
 
   console.log(`✅ Release v${newVersion} completed successfully!`);
 } catch (error) {
