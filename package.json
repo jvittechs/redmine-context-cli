@@ -35,7 +35,7 @@
     "dev": "tsx src/cli.ts --help",
     "lint": "eslint .",
     "test": "vitest run",
-    "release": "pnpm build && pnpm changeset publish"
+    "release": "node scripts/release.js"
   },
   "dependencies": {
     "commander": "^12.1.0",
