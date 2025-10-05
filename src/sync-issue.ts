@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve, relative } from 'node:path';
 import type { RedmineConfig } from './config.js';
 import { RedmineApiClient } from './api.js';
 import {
@@ -26,6 +26,7 @@ export interface SyncIssueResult {
   success: boolean;
   issueId: number;
   filename: string;
+  filePath: string;
   action: 'created' | 'updated' | 'skipped';
   message: string;
   changes?: {
@@ -50,6 +51,7 @@ export async function syncIssue(
 
     const filename = generateFilename(issue.id, issue.subject, config.filename);
     const filePath = resolve(outputDir, filename);
+    const relativePath = relative(process.cwd(), filePath);
 
     const existingFile = await readMarkdownFile(filePath);
     const existingIssueId = extractIssueIdFromFrontmatter(existingFile.frontmatter);
@@ -60,6 +62,7 @@ export async function syncIssue(
         success: false,
         issueId: issue.id,
         filename,
+        filePath: relativePath,
         action: 'skipped',
         message: `File ${filename} contains issue ${existingIssueId}, not ${issue.id}`,
       };
@@ -76,6 +79,7 @@ export async function syncIssue(
         success: true,
         issueId: issue.id,
         filename,
+        filePath: relativePath,
         action: 'skipped',
         message: `Issue ${issueId} is already up to date`,
       };
@@ -116,6 +120,7 @@ export async function syncIssue(
         success: true,
         issueId: issue.id,
         filename,
+        filePath: relativePath,
         action,
         message: `Would ${action} issue ${issueId} (dry run)`,
         changes,
@@ -137,6 +142,7 @@ export async function syncIssue(
       success: true,
       issueId: issue.id,
       filename,
+      filePath: relativePath,
       action,
       message: `Successfully ${action} issue ${issueId}`,
       changes,
@@ -146,6 +152,7 @@ export async function syncIssue(
       success: false,
       issueId,
       filename: '',
+      filePath: '',
       action: 'skipped',
       message: `Failed to sync issue ${issueId}: ${error instanceof Error ? error.message : String(error)}`,
     };

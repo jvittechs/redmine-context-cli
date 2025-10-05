@@ -1,61 +1,35 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { existsSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-function createChangeset() {
-  const changesetDir = '.changeset';
-  const timestamp = Date.now();
-  const changesetFile = join(changesetDir, `auto-release-${timestamp}.md`);
+const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 
-  const content = `---
-'jvit-redmine-context-cli': patch
----
-
-Automated release`;
-
-  writeFileSync(changesetFile, content);
-  console.log('🦋  Created automatic changeset');
-}
+console.log('🚀 Starting release process...');
 
 try {
-  // Check if there are unreleased changesets
-  let hasChangesets = false;
-  try {
-    const result = execSync('pnpm changeset status --output=json', { encoding: 'utf8' });
-    const status = JSON.parse(result);
-    hasChangesets = status.releases && status.releases.length > 0;
-  } catch (error) {
-    // If changeset status fails, assume no changesets
-    hasChangesets = false;
+  // Check if there are changesets to release
+  const changesetStatus = execSync('pnpm changeset status', { encoding: 'utf8' });
+
+  if (changesetStatus.includes('No changesets found')) {
+    console.log('❌ No changesets found. Create a changeset first:');
+    console.log('   pnpm changeset');
+    process.exit(1);
   }
 
-  if (!hasChangesets) {
-    console.log('🦋  No changesets found, creating one automatically...');
-    createChangeset();
-  }
+  // Build the project
+  console.log('📦 Building project...');
+  execSync('pnpm build', { stdio: 'inherit' });
 
-  // Run changeset version
-  console.log('🦋  Updating version...');
+  // Run tests
+  console.log('🧪 Running tests...');
+  execSync('pnpm test', { stdio: 'inherit' });
+
+  // Version and publish with changesets
+  console.log('📝 Versioning and publishing...');
   execSync('pnpm changeset version', { stdio: 'inherit' });
-
-  // Install dependencies
-  console.log('🦋  Installing dependencies...');
-  execSync('pnpm install --no-frozen-lockfile', { stdio: 'inherit' });
-
-  // Commit changes
-  console.log('🦋  Committing version changes...');
-  execSync('git add .', { stdio: 'inherit' });
-  execSync('git commit -m "chore: version"', { stdio: 'inherit' });
-
-  // Push to remote
-  console.log('🦋  Pushing to remote...');
-  execSync('git push', { stdio: 'inherit' });
-
-  // Publish to npm
-  console.log('🦋  Publishing to npm...');
-  execSync('npm publish --access public', { stdio: 'inherit' });
+  execSync('pnpm changeset publish', { stdio: 'inherit' });
 
   console.log('✅ Release completed successfully!');
 } catch (error) {
