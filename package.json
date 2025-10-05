@@ -1,6 +1,6 @@
 {
   "name": "jvit-redmine-context-cli",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "CLI to extract Redmine issues as context for agentic coding workflows",
   "type": "module",
   "bin": {
@@ -35,7 +35,7 @@
     "dev": "tsx src/cli.ts --help",
     "lint": "eslint .",
     "test": "vitest run",
-    "release": "changeset version && pnpm install --no-frozen-lockfile && git commit -am \"chore: version\" && git push && npm publish --access public"
+    "release": "node scripts/release.js"
   },
   "dependencies": {
     "commander": "^12.1.0",
