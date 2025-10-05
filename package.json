@@ -19,7 +19,7 @@
   "author": "JVIT <dev@jvit.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jvit/jvit-redmine-context-cli.git"
+    "url": "git+https://github.com/jvittechs/redmine-context-cli.git"
   },
   "keywords": [
     "redmine",
