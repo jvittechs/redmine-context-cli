@@ -1,5 +1,11 @@
 # jvit-redmine-context-cli
 
+## 0.1.16
+
+### Patch Changes
+
+- Fix \_\_dirname undefined error in init command
+
 ## 0.1.15
 
 ### Patch Changes

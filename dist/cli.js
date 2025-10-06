@@ -714,9 +714,10 @@ async function syncProject(config, options = {}) {
 
 // src/cli.ts
 import { promises as fs } from "fs";
-import { join } from "path";
+import { join, dirname as dirname2 } from "path";
+import { fileURLToPath } from "url";
 var program = new Command();
-program.name("redmine").description("CLI to sync Redmine issues to local Markdown files").version("0.1.15");
+program.name("redmine").description("CLI to sync Redmine issues to local Markdown files").version("0.1.16");
 program.on("command:*", (operands) => {
   console.error(`\u274C Unknown command: ${operands[0]}`);
   console.error("\nAvailable commands:");
@@ -745,6 +746,8 @@ program.command("init").description("Initialize configuration in current directo
   console.log(`  - scripts/${scriptFileName} (utility script)`);
   console.log("");
   try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname2(__filename);
     const packageDir = join(__dirname, "..");
     const sourceConfigPath = join(packageDir, configFileName);
     try {

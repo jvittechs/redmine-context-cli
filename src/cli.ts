@@ -6,14 +6,15 @@ import { checkConnectivity } from './connectivity-check.js';
 import { syncIssue, extractIssueIdFromUrl } from './sync-issue.js';
 import { syncProject } from './sync-project.js';
 import { promises as fs } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 const program = new Command();
 
 program
   .name('redmine')
   .description('CLI to sync Redmine issues to local Markdown files')
-  .version('0.1.15');
+  .version('0.1.16');
 
 // Handle unknown commands with helpful suggestions
 program.on('command:*', (operands) => {
@@ -60,6 +61,8 @@ program
 
     try {
       // Copy example config file from package
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
       const packageDir = join(__dirname, '..');
       const sourceConfigPath = join(packageDir, configFileName);
 
