@@ -714,10 +714,9 @@ async function syncProject(config, options = {}) {
 
 // src/cli.ts
 import { promises as fs } from "fs";
-import { join, dirname as dirname2 } from "path";
-import { fileURLToPath } from "url";
+import { join } from "path";
 var program = new Command();
-program.name("redmine").description("CLI to sync Redmine issues to local Markdown files").version("0.1.16");
+program.name("redmine").description("CLI to sync Redmine issues to local Markdown files").version("0.1.17");
 program.on("command:*", (operands) => {
   console.error(`\u274C Unknown command: ${operands[0]}`);
   console.error("\nAvailable commands:");
@@ -746,16 +745,42 @@ program.command("init").description("Initialize configuration in current directo
   console.log(`  - scripts/${scriptFileName} (utility script)`);
   console.log("");
   try {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname2(__filename);
-    const packageDir = join(__dirname, "..");
-    const sourceConfigPath = join(packageDir, configFileName);
+    const exampleConfig = `# Example configuration for jvit-redmine-context-cli
+# Copy this file to redmine.config.yaml and update with your settings
+
+baseUrl: https://redmine.example.com
+apiAccessToken: YOUR_API_TOKEN_HERE
+project:
+  id: 123
+  identifier: my-project
+outputDir: .jai1/redmine
+defaults:
+  include: [journals, relations, attachments]
+  status: '*'
+  pageSize: 100
+  concurrency: 4
+  retry:
+    retries: 3
+    baseMs: 300
+filename:
+  pattern: '{issueId}-{slug}.md'
+  slug:
+    maxLength: 80
+    dedupe: true
+    lowercase: true
+  renameOnTitleChange: false
+comments:
+  anchors:
+    start: '<!-- redmine:comments:start -->'
+    end: '<!-- redmine:comments:end -->'
+  trackBy: journalId
+`;
     try {
-      await fs.copyFile(sourceConfigPath, configPath);
+      await fs.writeFile(configPath, exampleConfig, "utf8");
       console.log(`\u2705 Created ${configFileName}`);
     } catch (error) {
       console.error(
-        `\u274C Failed to copy ${configFileName}:`,
+        `\u274C Failed to create ${configFileName}:`,
         error instanceof Error ? error.message : String(error)
       );
       process.exit(1);
@@ -765,15 +790,50 @@ program.command("init").description("Initialize configuration in current directo
       await fs.mkdir(scriptsDir, { recursive: true });
     } catch {
     }
-    const sourceScriptPath = join(packageDir, "scripts", scriptFileName);
+    const syncScript = `#!/bin/bash
+
+# JVIT Redmine Context CLI - Issue Sync Script
+# Usage: ./scripts/redmine-sync-issue.sh <id|url>
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <issue-id|issue-url>"
+    echo ""
+    echo "Examples:"
+    echo "  $0 12345"
+    echo "  $0 https://redmine.example.com/issues/12345"
+    exit 1
+fi
+
+INPUT="$1"
+
+# Check if input is a URL
+if [[ "$INPUT" =~ ^https?:// ]]; then
+    # Extract issue ID from URL
+    ISSUE_ID=$(echo "$INPUT" | sed -n 's/.*\\/issues\\/\\([0-9]*\\).*/\\1/p')
+    if [ -z "$ISSUE_ID" ]; then
+        echo "\u274C Could not extract issue ID from URL: $INPUT"
+        exit 1
+    fi
+    echo "\u{1F517} Detected URL, syncing issue ID: $ISSUE_ID"
+    redmine sync issue --url "$INPUT"
+else
+    # Assume it's an issue ID
+    if [[ ! "$INPUT" =~ ^[0-9]+$ ]]; then
+        echo "\u274C Invalid issue ID: $INPUT (must be a number)"
+        exit 1
+    fi
+    echo "\u{1F522} Detected issue ID: $INPUT"
+    redmine sync issue --id "$INPUT"
+fi
+`;
     const targetScriptPath = join(scriptsDir, scriptFileName);
     try {
-      await fs.copyFile(sourceScriptPath, targetScriptPath);
+      await fs.writeFile(targetScriptPath, syncScript, "utf8");
       await fs.chmod(targetScriptPath, 493);
       console.log(`\u2705 Created scripts/${scriptFileName} (executable)`);
     } catch (error) {
       console.error(
-        `\u274C Failed to copy ${scriptFileName}:`,
+        `\u274C Failed to create ${scriptFileName}:`,
         error instanceof Error ? error.message : String(error)
       );
       process.exit(1);

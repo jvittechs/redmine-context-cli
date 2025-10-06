@@ -1,5 +1,11 @@
 # jvit-redmine-context-cli
 
+## 0.1.17
+
+### Patch Changes
+
+- Fix init command to use embedded file content instead of copying files
+
 ## 0.1.16
 
 ### Patch Changes
