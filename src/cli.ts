@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('redmine')
   .description('CLI to sync Redmine issues to local Markdown files')
-  .version('0.1.13');
+  .version('0.1.15');
 
 // Handle unknown commands with helpful suggestions
 program.on('command:*', (operands) => {

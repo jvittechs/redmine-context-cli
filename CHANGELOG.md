@@ -1,5 +1,17 @@
 # jvit-redmine-context-cli
 
+## 0.1.15
+
+### Patch Changes
+
+- Automatic patch release
+
+## 0.1.14
+
+### Patch Changes
+
+- Test version sync fix
+
 ## 0.1.13
 
 ### Patch Changes
