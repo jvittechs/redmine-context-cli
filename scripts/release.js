@@ -87,7 +87,8 @@ Automatic patch release
 
     // Commit the version changes
     console.log('📋 Committing version changes...');
-    execSync('git add package.json CHANGELOG.md src/cli.ts dist/', { stdio: 'inherit' });
+    execSync('git add package.json CHANGELOG.md src/cli.ts', { stdio: 'inherit' });
+    execSync('git add -f dist/cli.js dist/cli.d.ts', { stdio: 'inherit' });
     execSync(`git commit -m "chore: bump version to ${newVersion}"`, { stdio: 'inherit' });
 
     // Push to remote
