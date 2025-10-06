@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('redmine')
   .description('CLI to sync Redmine issues to local Markdown files')
-  .version('0.1.7');
+  .version('0.1.13');
 
 // Handle unknown commands with helpful suggestions
 program.on('command:*', (operands) => {
@@ -31,18 +31,7 @@ program
   .option('-c, --config <path>', 'Path to configuration file', 'redmine.config.yaml')
   .option('-o, --output-dir <path>', 'Output directory for markdown files')
   .option('--dry-run', 'Show what would be done without making changes')
-  .option('--json', 'Output results as JSON')
-  .hook('preAction', async (thisCommand) => {
-    try {
-      const configPath = thisCommand.opts().config;
-      await loadConfig(configPath);
-    } catch (error) {
-      console.error(
-        `Configuration error: ${error instanceof Error ? error.message : String(error)}`
-      );
-      process.exit(2);
-    }
-  });
+  .option('--json', 'Output results as JSON');
 
 program
   .command('init')

@@ -64,9 +64,30 @@ Automatic patch release
 
   // Check if version actually changed
   if (packageJson.version !== newVersion) {
+    // Update version in CLI source code
+    console.log('🔄 Updating version in CLI source code...');
+    const cliFilePath = join('src', 'cli.ts');
+    let cliContent = readFileSync(cliFilePath, 'utf8');
+
+    // Update version line in CLI
+    const versionRegex = /\.version\('([^']+)'\);/;
+    const match = cliContent.match(versionRegex);
+
+    if (match) {
+      cliContent = cliContent.replace(versionRegex, `.version('${newVersion}');`);
+      writeFileSync(cliFilePath, cliContent);
+      console.log(`✅ Updated CLI version from ${match[1]} to ${newVersion}`);
+    } else {
+      console.log('⚠️  Could not find version line in CLI source code');
+    }
+
+    // Rebuild with updated version
+    console.log('🔄 Rebuilding with updated version...');
+    execSync('pnpm build', { stdio: 'inherit' });
+
     // Commit the version changes
     console.log('📋 Committing version changes...');
-    execSync('git add package.json CHANGELOG.md', { stdio: 'inherit' });
+    execSync('git add package.json CHANGELOG.md src/cli.ts dist/', { stdio: 'inherit' });
     execSync(`git commit -m "chore: bump version to ${newVersion}"`, { stdio: 'inherit' });
 
     // Push to remote
